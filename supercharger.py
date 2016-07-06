@@ -17,13 +17,13 @@ import json
 import elasticsearch
 
 
-# Name of the index as a global variable
-INDEX_NAME = "supercharger"
+# Load the configuration
+cfg = json.load(open("config.json"))
 
 es = elasticsearch.Elasticsearch()
 
 
-def index():
+def index(index_name=cfg["index_name"], type_name=cfg["type_name"]):
 	"Send documents to Elasticsearch"
 
 	# Import data from the CSV file
@@ -35,19 +35,17 @@ def index():
 		documents.append(line)
 
 	# If the index already exists, delete it
-	if INDEX_NAME in es.indices.stats()["indices"].keys():
-		es.indices.delete(index=INDEX_NAME)
+	if index_name in es.indices.stats()["indices"].keys():
+		es.indices.delete(index=index_name)
 
-	# Define the settings and mappings of our index
-	index_settings_and_mappings = json.load(open("index_metadata.json"))
-	es.indices.create(index=INDEX_NAME, body=index_settings_and_mappings)
+	es.indices.create(index=index_name, body=cfg["index_metadata"])
 
 	# Index all documents from the CSV file
 	for doc in documents:
-	    es.index(index=INDEX_NAME, doc_type="communication_item", body=doc)
+	    es.index(index=index_name, doc_type=type_name, body=doc)
 
 
-def query(text):
+def query(text, index_name=cfg["index_name"], type_name=cfg["type_name"]):
 	"Issue a simple text query to Elasticsearch."
 
 	body = {
@@ -57,7 +55,7 @@ def query(text):
 	        }
 	    }
 	}
-	results = es.search(index=INDEX_NAME, doc_type="communication_item",
+	results = es.search(index=index_name, doc_type=type_name,
 						body=body)
 	return results["hits"]["hits"]
 
