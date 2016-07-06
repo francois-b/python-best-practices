@@ -36,4 +36,5 @@ def index():
 	for doc in documents:
 	    es.index(index=INDEX_NAME, doc_type="communication_item", body=doc)
 
-index()
+if __name__ == "__main__":
+	index()
