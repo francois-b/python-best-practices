@@ -1,6 +1,13 @@
 {
     "index_name": "supercharger",
     "type_name": "communication_item",
+    "query_template": {
+        "query": {
+            "fuzzy": {
+                "body": "{{ query_text }}"
+            }
+        }
+    },
     "index_metadata": {
         "settings": {
             "index": {

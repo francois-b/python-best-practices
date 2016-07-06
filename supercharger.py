@@ -15,6 +15,7 @@ import csv
 import json
 
 import elasticsearch
+from jinja2 import Template
 
 
 # Load the configuration
@@ -50,13 +51,9 @@ def index(index_name=cfg["index_name"], type_name=cfg["type_name"]):
 def query(text, index_name=cfg["index_name"], type_name=cfg["type_name"]):
 	"Issue a simple text query to Elasticsearch."
 
-	body = {
-	    "query": {
-	        "fuzzy": {
-	            "body": text
-	        }
-	    }
-	}
+	template = Template(json.dumps(cfg["query_template"]))
+	body_string = template.render(query_text=text)
+	body = json.loads(body_string)
 	results = es.search(index=index_name, doc_type=type_name,
 						body=body)
 	return results["hits"]["hits"]
