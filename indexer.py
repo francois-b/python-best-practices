@@ -1,7 +1,15 @@
-"""Indexer for the dummy "Supercharger" project.
+"""Index & Query Utility for the dummy "Supercharger" project.
 
 This module provides indexing capabilities to easily send text to ES.
-"""
+
+
+Usage:
+  indexer --index
+  indexer --query <text>
+  indexer --version
+
+Options:
+  -h --help     Show this screen."""
 
 import csv
 import json
@@ -55,4 +63,13 @@ def query(text):
 
 
 if __name__ == "__main__":
-	print query("helvetica")
+
+	from docopt import docopt
+	opts = docopt(__doc__)
+
+	if opts["--index"]:
+		index()
+	elif opts["--query"]:
+		print query(opts["<text>"])
+	else:
+		print "Wrong invocation. See --help."
