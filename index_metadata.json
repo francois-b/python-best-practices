@@ -1,0 +1,67 @@
+{
+    "settings": {
+        "index": {
+            "number_of_shards": 1,
+            "number_of_replicas": 0
+        },
+        "analysis": {
+            "analyzer": {
+                "multiple_word_analyzer": {
+                    "type": "custom",
+                    "tokenizer": "standard",
+                    "filter": ["multiple_word_filter"]
+                },
+                "complex_analyzer": {
+                    "type": "custom",
+                    "tokenizer": "standard",
+                    "filter": [
+                        "lowercase", "stemmer", "my_synonym_filter", "stop",
+                        "multiple_word_filter", "positional_fix", "trim",
+                        "unique"
+                    ]
+                },
+                "complex_query_analyzer": {
+                    "type": "custom",
+                    "tokenizer": "keyword",
+                    "filter": ["multiple_word_filter"]
+                }
+            },
+            "filter": {
+                "multiple_word_filter": {
+                    "type": "shingle",
+                    "output_unigrams": true,
+                    "min_shingle_size": 2,
+                    "max_shingle_size": 10
+                },
+                "my_synonym_filter" : {
+                    "type" : "synonym",
+                    "synonyms" : [
+                        "ze => the",
+                        "all => the"
+                    ]
+                },
+                "positional_fix": {
+                    "type": "pattern_replace",
+                    "pattern": " ?_",
+                    "replace": ""
+                }
+            }
+        }
+    },
+    "mappings": {
+        "communication_item": {
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "analyzer": "multiple_word_analyzer",
+                    "search_analyzer": "keyword"
+                },
+                "body": {
+                    "type": "string",
+                    "analyzer": "complex_analyzer",
+                    "search_analyzer": "complex_query_analyzer"
+                }
+            }
+        }
+    }
+}
