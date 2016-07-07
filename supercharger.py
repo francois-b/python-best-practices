@@ -15,6 +15,7 @@ Options:
 import csv
 import json
 import sys
+import logging
 
 import elasticsearch
 from jinja2 import Template
@@ -22,6 +23,16 @@ from jinja2 import Template
 from flask import Flask
 app = Flask(__name__)
 
+
+logger = logging.getLogger("")
+handler = logging.FileHandler("supercharger.log")
+
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+
+logger.setLevel(logging.DEBUG)
+logger.addHandler(handler)
+log = logger
 
 # Load the configuration
 with open("config.json") as config_file:
@@ -87,6 +98,7 @@ def hello():
 
 @app.route('/query/<text>')
 def web_query(text):
+	log.debug("Query received for '{}'".format(text))
 	results = query(text)
 	output = "<br><br>".join([item["_source"]["body"] for item in results])
 	return "<h2>Results for '{0}':</h2><br>{1}".format(text, output)
@@ -104,6 +116,7 @@ if __name__ == "__main__":
 		if results:
 			print results
 	elif opts["--web"]:
+		log.info("Web server started.")
 		app.run()
 	else:
 		print "Wrong invocation. See --help."
