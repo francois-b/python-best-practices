@@ -13,6 +13,7 @@ Options:
 
 import csv
 import json
+import sys
 
 import elasticsearch
 from jinja2 import Template
@@ -20,7 +21,11 @@ from jinja2 import Template
 
 # Load the configuration
 with open("config.json") as config_file:
-	cfg = json.load(config_file)
+	try:
+		cfg = json.load(config_file)
+	except ValueError:
+		print "The configuration file is not valid JSON."
+		sys.exit()
 
 es = elasticsearch.Elasticsearch()
 
