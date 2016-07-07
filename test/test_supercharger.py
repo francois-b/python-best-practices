@@ -1,6 +1,7 @@
 import time
 
 import elasticsearch
+import pytest
 
 import supercharger
 
@@ -25,4 +26,6 @@ def test_query():
     assert results[0]["_source"]["category"] == "email"
 
 def test_bad_query():
-    results = supercharger.query(text='//"}}', index_name="test-dummy-index")
+    with pytest.raises(supercharger.BadQueryError):
+        results = supercharger.query(text='//"}}',
+                                     index_name="test-dummy-index")

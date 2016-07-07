@@ -24,6 +24,8 @@ with open("config.json") as config_file:
 
 es = elasticsearch.Elasticsearch()
 
+class BadQueryError(Exception):
+	pass
 
 def index(index_name=cfg["index_name"], type_name=cfg["type_name"]):
 	"Send documents to Elasticsearch"
@@ -53,7 +55,12 @@ def query(text, index_name=cfg["index_name"], type_name=cfg["type_name"]):
 
 	template = Template(json.dumps(cfg["query_template"]))
 	body_string = template.render(query_text=text)
-	body = json.loads(body_string)
+	try:
+		body = json.loads(body_string)
+	except ValueError:
+		raise BadQueryError(
+			"The query string should only contain alpha-numeric text")
+
 	results = es.search(index=index_name, doc_type=type_name,
 						body=body)
 	return results["hits"]["hits"]
