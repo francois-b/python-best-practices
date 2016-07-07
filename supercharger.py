@@ -6,6 +6,7 @@ This module provides indexing capabilities to easily send text to ES.
 Usage:
   indexer --index
   indexer --query <text>
+  indexer --web
   indexer --version
 
 Options:
@@ -17,6 +18,9 @@ import sys
 
 import elasticsearch
 from jinja2 import Template
+
+from flask import Flask
+app = Flask(__name__)
 
 
 # Load the configuration
@@ -52,7 +56,7 @@ def index(index_name=cfg["index_name"], type_name=cfg["type_name"]):
 
 	# Index all documents from the CSV file
 	for doc in documents:
-	    es.index(index=index_name, doc_type=type_name, body=doc)
+		es.index(index=index_name, doc_type=type_name, body=doc)
 
 
 def query(text, index_name=cfg["index_name"], type_name=cfg["type_name"]):
@@ -76,6 +80,18 @@ def query(text, index_name=cfg["index_name"], type_name=cfg["type_name"]):
 	return results["hits"]["hits"]
 
 
+@app.route("/")
+def hello():
+	return "Hello World!"
+
+
+@app.route('/query/<text>')
+def web_query(text):
+	results = query(text)
+	output = "<br><br>".join([item["_source"]["body"] for item in results])
+	return "<h2>Results for '{0}':</h2><br>{1}".format(text, output)
+
+
 if __name__ == "__main__":
 
 	from docopt import docopt
@@ -87,5 +103,7 @@ if __name__ == "__main__":
 		results = query(opts["<text>"])
 		if results:
 			print results
+	elif opts["--web"]:
+		app.run()
 	else:
 		print "Wrong invocation. See --help."
