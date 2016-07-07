@@ -66,8 +66,13 @@ def query(text, index_name=cfg["index_name"], type_name=cfg["type_name"]):
 		raise BadQueryError(
 			"The query string should only contain alpha-numeric text")
 
-	results = es.search(index=index_name, doc_type=type_name,
-						body=body)
+	try:
+		results = es.search(index=index_name, doc_type=type_name,
+							body=body)
+	except elasticsearch.exceptions.NotFoundError:
+		print "Elasticsearch index not found:", index_name
+		return
+
 	return results["hits"]["hits"]
 
 
@@ -79,6 +84,8 @@ if __name__ == "__main__":
 	if opts["--index"]:
 		index()
 	elif opts["--query"]:
-		print query(opts["<text>"])
+		results = query(opts["<text>"])
+		if results:
+			print results
 	else:
 		print "Wrong invocation. See --help."

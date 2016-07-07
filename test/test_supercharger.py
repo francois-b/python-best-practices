@@ -29,3 +29,17 @@ def test_bad_query():
     with pytest.raises(supercharger.BadQueryError):
         results = supercharger.query(text='//"}}',
                                      index_name="test-dummy-index")
+
+def test_es_index_not_found(capsys):
+    # If the index already exists, delete it
+    es = elasticsearch.Elasticsearch()
+    if "test-dummy-index" in es.indices.stats()["indices"].keys():
+        es.indices.delete(index="test-dummy-index")
+
+    # Excecute a query on an index that doesn't exist
+    results = supercharger.query(text="coffee",
+                                 index_name="test-dummy-index")
+
+    # Capture standard output and compare
+    out, err = capsys.readouterr()
+    assert out == "Elasticsearch index not found: test-dummy-index\n"
