@@ -4,10 +4,10 @@ This module provides indexing capabilities to easily send text to ES.
 
 
 Usage:
-  indexer --index
-  indexer --query <text>
-  indexer --web
-  indexer --version
+  supercharger --index
+  supercharger --query <text>
+  supercharger --web
+  supercharger --version
 
 Options:
   -h --help     Show this screen."""
